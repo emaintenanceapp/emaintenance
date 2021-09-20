@@ -1,0 +1,3 @@
+INSERT INTO public.equipamento (data_atualizacao,data_cadastro,defeito,descricao,localizacao,nome,numero_patrimonio,numero_tag,operacional,status,id_tipo_equipamento,id_fabricante) VALUES
+	 ('2021-04-08','2021-08-04',true,'Trator da Fazenda do seu Tarso','Garagem da Fazenda','Trator Massey Ferguson','123987','258',true,true,4,2),
+	 ('2021-04-08','2021-04-08',true,'Teste de Chaves de Fenda','Dentro da Mala de Ferramentas','Teste de Ferramentas','000001','1020',true,true,1,1);

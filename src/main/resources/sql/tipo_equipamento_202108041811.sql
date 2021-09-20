@@ -1,0 +1,15 @@
+INSERT INTO public.tipo_equipamento (nome,descricao,status) VALUES
+	 ('Gerador de Energia Interno', null, true),
+	 ('Gerador de Energia Externo', null, true),
+	 ('Compressores', null, true),
+	 ('Tratores', null, true),
+	 ('Escavadeiras', null, true),
+	 ('Carregadeiras', null, true),
+	 ('Bombas', null, true),
+	 ('Dutos', null, true),
+	 ('Andaime', null, true),
+	 ('Guincho', null, true),
+	 ('Betoneira', null, true),
+	 ('Plataforma Aerea', null, true),
+	 ('Balancim Eletrico', null, true),
+	 ('Balancim Manual', null, true);
