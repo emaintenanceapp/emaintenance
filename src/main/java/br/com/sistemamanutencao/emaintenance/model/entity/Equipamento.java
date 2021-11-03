@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import br.com.sistemamanutencao.emaintenance.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -71,6 +72,10 @@ public class Equipamento implements Serializable{
 	@Column
 	private String localizacao;
 
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
+
     @JsonFormat(pattern = "dd/MM/yyy")
 	@Column(name = "data_cadastro", updatable = false)
 	private LocalDate dataCadastro;
@@ -87,6 +92,14 @@ public class Equipamento implements Serializable{
 	public void prepersist(){
 		setDataCadastro(LocalDate.now());
 		setDataAtualizacao(LocalDate.now());
+	}
+	
+	public void activate() {
+		this.status = true;
+	}
+	
+	public void deactivate() {
+		this.status = false;
 	}
 
 }

@@ -109,5 +109,13 @@ public class Fabricante implements Serializable {
 		setDataCadastro(LocalDate.now());
 		setDataAtualizacao(LocalDate.now());
 	}
+	
+	public void activate() {
+		this.status = true;
+	}
+	
+	public void deactivate() {
+		this.status = false;
+	}
 
 }

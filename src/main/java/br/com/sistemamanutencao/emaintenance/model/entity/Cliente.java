@@ -1,6 +1,8 @@
 package br.com.sistemamanutencao.emaintenance.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import br.com.sistemamanutencao.emaintenance.model.User;
 import lombok.*;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -29,14 +31,18 @@ public class Cliente {
     @CPF(message = "{campo.cpf.invalido}")
     private String cpf;
 
-	@Column(name = "data_cadastro", updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
+    
+    @Column(name = "data_cadastro", updatable = false)
 	@JsonFormat(pattern = "dd/MM/yyy")
 	private LocalDate dataCadastro;
 	
 	@Column(name = "data_atualizacao", updatable = true)
 	@JsonFormat(pattern = "dd/MM/yyy")
 	private LocalDate dataAtualizacao;
-	
+		
 	@Column
 	private boolean status;
 
@@ -44,5 +50,13 @@ public class Cliente {
 	public void prepersist() {
 		setDataCadastro(LocalDate.now());
 		setDataAtualizacao(LocalDate.now());
+	}
+	
+	public void activate() {
+		this.status = true;
+	}
+	
+	public void deactivate() {
+		this.status = false;
 	}
 }

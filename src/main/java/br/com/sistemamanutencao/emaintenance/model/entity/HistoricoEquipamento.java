@@ -8,10 +8,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import br.com.sistemamanutencao.emaintenance.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,6 +34,10 @@ public class HistoricoEquipamento implements Serializable {
 
 	@Column(nullable = false, length = 150)
 	private String nome;
+	
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
 
 	@JsonFormat(pattern = "dd/MM/yyy")
 	@Column(name = "data_cadastro", updatable = false)
@@ -47,5 +54,13 @@ public class HistoricoEquipamento implements Serializable {
 	public void prepersist(){
 		setDataCadastro(LocalDate.now());
 		setDataAtualizacao(LocalDate.now());
+	}
+	
+	public void activate() {
+		this.status = true;
+	}
+	
+	public void deactivate() {
+		this.status = false;
 	}
 }

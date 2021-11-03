@@ -32,6 +32,14 @@ public class TipoManutencao implements Serializable {
 	private String descricao;
 
 	@Column
-	private boolean status;
+	private boolean status;    
+    
+	public void activate() {
+		this.status = true;
+	}
+	
+	public void deactivate() {
+		this.status = false;
+	}
 
 }

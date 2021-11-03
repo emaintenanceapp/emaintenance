@@ -33,4 +33,12 @@ public class TipoEquipamento implements Serializable{
 	
 	@Column
 	private boolean status;
+    
+	public void activate() {
+		this.status = true;
+	}
+	
+	public void deactivate() {
+		this.status = false;
+	}
 }
