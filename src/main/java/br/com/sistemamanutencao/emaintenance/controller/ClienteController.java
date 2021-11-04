@@ -1,4 +1,3 @@
-// NSJC&NSMS
 package br.com.sistemamanutencao.emaintenance.controller;
 
 import java.util.List;
@@ -9,7 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +52,7 @@ public class ClienteController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-    public Cliente salvar( @RequestBody @Valid Cliente cliente, @AuthenticationPrincipal User user ){
+    public Cliente salvar( @RequestBody @Valid Cliente cliente ){
     	
     	cliente.setCpf(cliente.getCpf().replaceAll("\\D", StringUtils.EMPTY));
     	
@@ -61,14 +61,13 @@ public class ClienteController {
             throw new ClienteCadastradoException(cliente.getCpf());
         }
         
-//        User user = currentUser.getUser();
-//        SecurityContext sc = SecurityContextHolder.getContext();
-//        System.out.println("Logged User Name: "+sc.getAuthentication().getName());
-//        System.out.println("Logged User Principal: "+sc.getAuthentication().getPrincipal());
-//        System.out.println("Logged User Credentials: "+sc.getAuthentication().getCredentials());
-//        System.out.println("Logged User Details: "+sc.getAuthentication().getDetails());
-//        System.out.println("Logged User Authorities: "+sc.getAuthentication().getAuthorities());
-        System.out.println("Logged User loggin dfdfd: "+user.getEmail());
+        User user = currentUser.getUser();
+        SecurityContext sc = SecurityContextHolder.getContext();
+        System.out.println("Logged User Name: "+sc.getAuthentication().getName());
+        System.out.println("Logged User Principal: "+sc.getAuthentication().getPrincipal());
+        System.out.println("Logged User Credentials: "+sc.getAuthentication().getCredentials());
+        System.out.println("Logged User Details: "+sc.getAuthentication().getDetails());
+        System.out.println("Logged User Authorities: "+sc.getAuthentication().getAuthorities());
         
         cliente.activate();
         cliente.setUser(user);
@@ -122,12 +121,4 @@ public class ClienteController {
                 })
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
     }
-    
-//    @RequestMapping("/novo")
-//	public ModelAndView novo(Usuario usuario, @AuthenticationPrincipal UsuarioSistema usuarioLogado, HttpSession session) {
-//		ModelAndView mv = util.validarLicenca(usuarioLogado, session, "usuario/CadastroUsuario");
-//		mv.addObject("empresas", empresas.findAll());
-//		mv.addObject("grupos", grupos.gruposUsuarioLogado(usuarioLogado.getUsuario()));
-//		return mv;
-//	}
 }
