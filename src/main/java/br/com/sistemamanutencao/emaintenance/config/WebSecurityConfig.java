@@ -59,11 +59,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //		auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
     }
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/**",
-                "/swagger-ui.html", "/webjars/**");
-    }
+//    @Override
+//    public void configure(WebSecurity web) {
+//        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/**",
+//                "/swagger-ui.html", "/webjars/**");
+//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -83,7 +83,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/favicon.ico", "/**/*.json", "/**/*.xml", "/**/*.properties", "/**/*.woff2", "/**/*.woff",
                 				"/**/*.ttf", "/**/*.ttc", "/**/*.ico", "/**/*.bmp", "/**/*.png", "/**/*.gif", "/**/*.svg",
                 				"/**/*.jpg", "/**/*.jpeg", "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
-                .antMatchers("/**/api/auth/**").permitAll()
+                .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/clientes/**").permitAll()
                 .antMatchers("/api/equipamentos/**").permitAll()
                 .antMatchers("/api/manutencoes/**").permitAll()
@@ -95,6 +95,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/tipos-manutencoes/**").permitAll()       
                 .antMatchers("/api/servicos-prestados/**").permitAll()
                 .antMatchers("/api/users/**").permitAll()
+                .antMatchers("/api/users/me/**").permitAll()
+                .antMatchers("/v2/api-docs", "/swagger-resources/configuration/ui", "/swagger-resources", "/swagger-resources/configuration/security", "/swagger-ui.html", "/webjars/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

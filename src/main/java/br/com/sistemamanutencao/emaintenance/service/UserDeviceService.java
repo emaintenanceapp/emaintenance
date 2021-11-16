@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.sistemamanutencao.emaintenance.dto.DeviceInfo;
 import br.com.sistemamanutencao.emaintenance.exception.TokenRefreshException;
+import br.com.sistemamanutencao.emaintenance.model.ConfirmationToken;
 import br.com.sistemamanutencao.emaintenance.model.RefreshToken;
 import br.com.sistemamanutencao.emaintenance.model.UserDevice;
 import br.com.sistemamanutencao.emaintenance.repository.UserDeviceRepository;
@@ -17,7 +18,7 @@ public class UserDeviceService {
 	@Autowired
     private UserDeviceRepository userDeviceRepository;
 
-    public Optional<UserDevice> findByUserId(Long userId) {
+    public Optional<UserDevice> findByUserId(Integer userId) {
         return userDeviceRepository.findByUserId(userId);
     }
 
@@ -41,4 +42,5 @@ public class UserDeviceService {
             throw new TokenRefreshException(refreshToken.getToken(), "Refresh blocked for the device. Please login through a different device");
         }
     }
+
 }

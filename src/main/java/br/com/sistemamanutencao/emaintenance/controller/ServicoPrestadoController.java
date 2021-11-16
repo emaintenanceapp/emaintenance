@@ -8,6 +8,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,26 +23,32 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.sistemamanutencao.emaintenance.dto.ServicoPrestadoDTO;
+import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
 import br.com.sistemamanutencao.emaintenance.model.entity.ServicoPrestado;
 import br.com.sistemamanutencao.emaintenance.repository.ClienteRepository;
 import br.com.sistemamanutencao.emaintenance.repository.ServicoPrestadoRepository;
-import br.com.sistemamanutencao.emaintenance.util.BigDecimalConverter;
+import br.com.sistemamanutencao.emaintenance.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @CrossOrigin(origins = {"${app.security.cors.origin}"})
 @RestController
 @RequestMapping("/api/servicos-prestados")
 @RequiredArgsConstructor
 public class ServicoPrestadoController {
 
-	private final ClienteRepository clienteRepository;
-	private final ServicoPrestadoRepository repository;
-	private final BigDecimalConverter bigDecimalConverter;
+    private final ClienteRepository clienteRepository;
+    private final UserRepository userRepository;
+	private final ServicoPrestadoRepository servicoPrestadoRepository;
 
-	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ServicoPrestado salvar(@RequestBody @Valid ServicoPrestadoDTO dto) {
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+    @PostMapping(value = "/{usuarioLogado}")
+	public ServicoPrestado salvar(@RequestBody @Valid ServicoPrestadoDTO dto, @PathVariable(value = "usuarioLogado") final String usuarioLogado) {
+    	
+		User user = userRepository.findByEmail(usuarioLogado);
 		LocalDate data = LocalDate.parse(dto.getData(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		Integer idCliente = dto.getIdCliente();
 
@@ -53,22 +60,25 @@ public class ServicoPrestadoController {
 		servicoPrestado.setData(data);
 		servicoPrestado.setCliente(cliente);
 		servicoPrestado.setPreco(dto.getPreco());
-
-		return repository.save(servicoPrestado);
+		servicoPrestado.setUser(user);
+		log.info("Serviço Prestado salvo com sucesso! " + servicoPrestado.getId());
+		return servicoPrestadoRepository.save(servicoPrestado);
 	}
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@GetMapping
 	public List<ServicoPrestado> pesquisar(
 			@RequestParam(value = "nome", required = false, defaultValue = "") String nome,
 			@RequestParam(value = "mes", required = false) Integer mes) {
-		return repository.findByNomeClienteAndMes("%" + nome + "%", mes);
+		return servicoPrestadoRepository.findByNomeClienteAndMes("%" + nome + "%", mes);
 	}
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@GetMapping("/pesquisarDTO")
 	public List<ServicoPrestadoDTO> pesquisarDTO(
 			@RequestParam(value = "nome", required = false, defaultValue = "") String nome,
 			@RequestParam(value = "mes", required = false) Integer mes) {
-		List<ServicoPrestado> listaServicosPrestados = repository.findByNomeClienteAndMes("%" + nome + "%", mes);
+		List<ServicoPrestado> listaServicosPrestados = servicoPrestadoRepository.findByNomeClienteAndMes("%" + nome + "%", mes);
 		ServicoPrestadoDTO servicoPrestadoDTO = new ServicoPrestadoDTO();
 		List<ServicoPrestadoDTO> dto = new ArrayList<ServicoPrestadoDTO>();
 		for (ServicoPrestado sp : listaServicosPrestados) {
@@ -81,36 +91,45 @@ public class ServicoPrestadoController {
 		}
 		return dto;
 	}
-//
-//	@GetMapping
-//	public List<ServicoPrestado> obterTodos() {
-//		return repository.findAll();
-//	}
+	
+    // Consulta traz apenas os cadatrados pelo usuário corrente
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+	@GetMapping("/{userId}")
+	public List<ServicoPrestado> findClientesByUser(@PathVariable Integer userId) {		
+		List<ServicoPrestado> servicoPrestados = servicoPrestadoRepository.findClientesByUserId(userId);		
+		return servicoPrestados;
+	}
 
-	@GetMapping("{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+	@GetMapping("/servico-prestado/{id}")
 	public ServicoPrestado acharPorId(@PathVariable Integer id) {
-		return repository.findById(id).orElseThrow(
+		return servicoPrestadoRepository.findById(id).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico Prestado não encontrado"));
 	}
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@DeleteMapping("{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deletar(@PathVariable Integer id) {
-		repository.findById(id).map(servicoPrestado -> {
-			repository.delete(servicoPrestado);
+		servicoPrestadoRepository.findById(id).map(servicoPrestado -> {
+			servicoPrestadoRepository.delete(servicoPrestado);
 			return Void.TYPE;
 		}).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico Prestado não encontrado"));
 	}
 
-	@PutMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void atualizar(@PathVariable Integer id, @RequestBody @Valid ServicoPrestado servicoPrestadoAtualizado) {
-		repository.findById(id).map(servicoPrestado -> {
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+    @PutMapping(value = "/{usuarioLogado}/{id}")
+	public void atualizar(@PathVariable Integer id, @RequestBody @Valid ServicoPrestado servicoPrestadoAtualizado, @PathVariable(value = "usuarioLogado") final String usuarioLogado ) {
+		User user = userRepository.findByEmail(usuarioLogado);
+		servicoPrestadoRepository.findById(id).map(servicoPrestado -> {
 			servicoPrestado.setCliente(servicoPrestadoAtualizado.getCliente());
 			servicoPrestado.setDescricao(servicoPrestadoAtualizado.getDescricao());
 			servicoPrestado.setData(servicoPrestadoAtualizado.getData());
 			servicoPrestado.setPreco(servicoPrestadoAtualizado.getPreco());
-			return repository.save(servicoPrestado);
+			servicoPrestado.setUser(user);
+			log.info("Serviço Prestado atualizado com sucesso! " + servicoPrestado.getId());
+			return servicoPrestadoRepository.save(servicoPrestado);
 		}).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico Prestado não encontrado"));
 	}
 }

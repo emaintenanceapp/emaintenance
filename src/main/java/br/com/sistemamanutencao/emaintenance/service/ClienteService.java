@@ -19,8 +19,13 @@ public class ClienteService {
 		return repository.existsByCpf(cpf);
 	}
 	
-    public List<Cliente> findClientesByuser(Long userId) {
-		List<Cliente> clientes = repository.findClientesByUser(userId);
+    public List<Cliente> findClientesByUserId(Integer userId) {
+		List<Cliente> clientes = repository.findClientesByUserId(userId);
 		return clientes.stream().collect(Collectors.toList());
+    }
+    
+    public List<Cliente> findClientesByUserEmail(String userEmail) {
+    	List<Cliente> clientes = repository.findClientesByUserEmail(userEmail);
+    	return clientes.stream().collect(Collectors.toList());
     }
 }

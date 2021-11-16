@@ -15,7 +15,7 @@ public class ManutencaoService {
 	@Autowired
 	private ManutencaoRepository manutencaoRepository;
     
-    public List<Manutencao> findEquipamentoByUser(Long userId) {
+    public List<Manutencao> findEquipamentoByUser(Integer userId) {
 		List<Manutencao> manutencoes = manutencaoRepository.findManutencaoByUser(userId);
 		return manutencoes.stream().collect(Collectors.toList());
     }

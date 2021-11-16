@@ -28,7 +28,7 @@ public class UserDevice {
     @Column
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_device_seq")
     @SequenceGenerator(name = "user_device_seq", allocationSize = 1)
-    private Long id;
+    private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)

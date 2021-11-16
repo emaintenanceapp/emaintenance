@@ -17,7 +17,7 @@ import br.com.sistemamanutencao.emaintenance.model.User;
 public class UserPrincipal implements UserDetails {
 	private static final long serialVersionUID = 1L;
  
-  	private Long id;
+  	private Integer id;
  
     private String name;
  
@@ -30,7 +30,7 @@ public class UserPrincipal implements UserDetails {
     
     private Map<String, Object> attributes;
  
-    public UserPrincipal(Long id, String name, 
+    public UserPrincipal(Integer id, String name, 
               String email, String password, 
               Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
@@ -54,7 +54,7 @@ public class UserPrincipal implements UserDetails {
         );
     }
  
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
  

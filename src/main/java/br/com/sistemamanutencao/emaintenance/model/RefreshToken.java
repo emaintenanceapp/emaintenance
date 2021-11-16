@@ -30,7 +30,7 @@ public class RefreshToken {
     @Column
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refresh_token_seq")
     @SequenceGenerator(name = "refresh_token_seq", allocationSize = 1)
-    private Long id;
+    private Integer id;
 
     @Column(name = "TOKEN", nullable = false, unique = true)
     private String token;

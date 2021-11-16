@@ -13,5 +13,5 @@ import br.com.sistemamanutencao.emaintenance.model.entity.Manutencao;
 public interface ManutencaoRepository extends JpaRepository<Manutencao, Integer> {
 
 	@Query(value = "select m from Manutencao m, User u where u.id = :userId ")
-	public List<Manutencao> findManutencaoByUser(@Param("userId") long userId);
+	public List<Manutencao> findManutencaoByUser(@Param("userId") Integer userId);
 }

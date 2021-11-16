@@ -15,7 +15,7 @@ public class EquipamentoService {
 	@Autowired
 	private EquipamentoRepository equipamentoRepository;
     
-    public List<Equipamento> findEquipamentoByuser(Long userId) {
+    public List<Equipamento> findEquipamentoByuser(Integer userId) {
 		List<Equipamento> equipamentos = equipamentoRepository.findEquipamentoByUser(userId);
 		return equipamentos.stream().collect(Collectors.toList());
     }

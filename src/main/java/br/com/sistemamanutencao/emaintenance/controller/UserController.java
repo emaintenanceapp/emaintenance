@@ -2,7 +2,6 @@ package br.com.sistemamanutencao.emaintenance.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -21,12 +20,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.sistemamanutencao.emaintenance.dto.LogOutRequest;
+import br.com.sistemamanutencao.emaintenance.dto.UserDTO;
 import br.com.sistemamanutencao.emaintenance.event.OnUserLogoutSuccessEvent;
 import br.com.sistemamanutencao.emaintenance.exception.ResourceNotFoundException;
 import br.com.sistemamanutencao.emaintenance.exception.UserLogoutException;
 import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.UserDevice;
-import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
 import br.com.sistemamanutencao.emaintenance.repository.UserRepository;
 import br.com.sistemamanutencao.emaintenance.response.ApiResponse;
 import br.com.sistemamanutencao.emaintenance.response.UserProfile;
@@ -34,6 +33,7 @@ import br.com.sistemamanutencao.emaintenance.service.CurrentUser;
 import br.com.sistemamanutencao.emaintenance.service.RefreshTokenService;
 import br.com.sistemamanutencao.emaintenance.service.UserDeviceService;
 import br.com.sistemamanutencao.emaintenance.service.UserPrincipal;
+import br.com.sistemamanutencao.emaintenance.service.UserService;
 
 @CrossOrigin(origins = {"${app.security.cors.origin}"})
 @RestController
@@ -42,6 +42,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private UserService userService;
         
     @Autowired
     private RefreshTokenService refreshTokenService;
@@ -53,25 +56,47 @@ public class UserController {
     private ApplicationEventPublisher applicationEventPublisher;
     
     
-    @GetMapping()
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
+    @GetMapping()
     public List<User> obterTodos(){
         return userRepository.findAll();
     }
 
-    @GetMapping("/me")
-    public User getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
-        return userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userPrincipal.getId()));
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
+////    @PostMapping("/{usuarioLogado}")
+////    public User getCurrentUser(@Valid @RequestBody String usuarioLogado) {
+//    @GetMapping("/me/{usuarioLogado}")
+//    public User getCurrentUser(@PathVariable(value = "usuarioLogado") final String usuarioLogado) {
+//		User user = userRepository.findByEmail(usuarioLogado);
+//        return user;
+//    }
+    
+    // Consulta traz apenas os cadatrados pelo usuário corrente
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+//    @GetMapping(value = "/me/{usuarioLogado}", produces="application/json")
+//    public User getCurrentUser(@PathVariable String usuarioLogado) {		
+//    	User user = userRepository.findByEmail(usuarioLogado);		
+//    	return user;
+//    }
+
+    // Consulta traz apenas os cadatrados pelo usuário corrente
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+    @GetMapping(value = "/me/{usuarioLogado}", produces="application/json")
+    public UserDTO getCurrentUserDTO(@PathVariable String usuarioLogado) {		
+    	UserDTO user = userService.findByEmailDTO(usuarioLogado);		
+    	return user;
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
     @GetMapping("/list")
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserProfile> getUserProfile(@RequestParam(value = "email", required = false) Optional<String> email) {
+    public List<UserProfile> getUserProfile(@RequestParam(value = "email", required = false) String email) {
     	List<UserProfile> userProfiles = new ArrayList<>();
-    	if (email.isPresent()) {
-    		User user = userRepository.findByEmail(email.get())
-                    .orElseThrow(() -> new ResourceNotFoundException("User", "email", email.get()));
+    	if (email != null) {
+//    		User user = userRepository.findByEmailIdIgnoreCase(email.get())
+//                    .orElseThrow(() -> new ResourceNotFoundException("User", "email", email.get()));
+    		
+    		User user = userRepository.findByEmail(email);
+    		
     		UserProfile userProfile = new UserProfile(user.getId(), user.getEmail(), user.getName(),  user.getActive());
     		userProfiles.add(userProfile);
     	} else {
@@ -84,9 +109,9 @@ public class UserController {
         return userProfiles;
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
     @GetMapping("/byID/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserProfile getUserProfileById(@PathVariable(value = "id") Long id) {
+    public UserProfile getUserProfileById(@PathVariable(value = "id") Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
@@ -95,9 +120,9 @@ public class UserController {
         return userProfile;
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
     @PutMapping("/byID/{id}/deactivate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> deactivateUserById(@PathVariable(value = "id") Long id) {
+    public ResponseEntity<ApiResponse> deactivateUserById(@PathVariable(value = "id") Integer id) {
     	User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         user.deactivate();
@@ -105,9 +130,9 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse(true, "User deactivated successfully!"));  
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
     @PutMapping("/byID/{id}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> activateUserById(@PathVariable(value = "id") Long id) {
+    public ResponseEntity<ApiResponse> activateUserById(@PathVariable(value = "id") Integer id) {
        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         user.activate();
@@ -115,27 +140,29 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse(true, "User activated successfully!"));
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
     @DeleteMapping("/byID/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> deleteUser(@PathVariable(value = "id") Long id) {
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable(value = "id") Integer id) {
     	User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         userRepository.delete(user);
         return ResponseEntity.ok(new ApiResponse(true, "User deleted successfully!"));
     }
         
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS')")
     @PutMapping("/logout")
     public ResponseEntity<ApiResponse> logoutUser(@CurrentUser UserPrincipal currentUser,
     		@Valid @RequestBody LogOutRequest logOutRequest) {
         String deviceId = logOutRequest.getDeviceInfo().getDeviceId();
         UserDevice userDevice = userDeviceService.findByUserId(currentUser.getId())
                 .filter(device -> device.getDeviceId().equals(deviceId))
-                .orElseThrow(() -> new UserLogoutException(logOutRequest.getDeviceInfo().getDeviceId(), "Invalid device Id supplied. No matching device found for the given user "));
+                .orElseThrow(() -> new UserLogoutException(logOutRequest.getDeviceInfo().getDeviceId(), 
+                		"ID de dispositivo inválido fornecido. Nenhum dispositivo correspondente encontrado para o usuário fornecido."));
         refreshTokenService.deleteById(userDevice.getRefreshToken().getId());
         
         OnUserLogoutSuccessEvent logoutSuccessEvent = new OnUserLogoutSuccessEvent(currentUser.getEmail(), logOutRequest.getToken(), logOutRequest);
         applicationEventPublisher.publishEvent(logoutSuccessEvent);
-        return ResponseEntity.ok(new ApiResponse(true, "User has successfully logged out from the system!"));
+        return ResponseEntity.ok(new ApiResponse(true, "O usuário saiu do sistema com sucesso!"));
     }
 
 }

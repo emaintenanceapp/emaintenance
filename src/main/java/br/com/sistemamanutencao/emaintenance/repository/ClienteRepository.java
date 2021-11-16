@@ -12,8 +12,16 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 	
 	Boolean existsByCpf(String cpf);
 
-    // Consulta traz apenas os cadatrados pelo usuário corrente
-	@Query(value = "SELECT e FROM Cliente e JOIN e.user u WHERE u.id =:userId")
-	List<Cliente> findClientesByUser(@Param("userId") long userId);
+    // Consulta apenas o cliente pelo id
+	@Query(value = "SELECT c FROM Cliente c WHERE c.id =:clienteId")
+	Cliente findClienteById(@Param("clienteId") Integer clienteId);
+
+	// Consulta traz apenas os cadatrados pelo usuário corrente pelo id
+	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId")
+	List<Cliente> findClientesByUserId(@Param("userId") Integer userId);
+
+	// Consulta traz apenas os cadatrados pelo usuário corrente pelo email
+	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.email =:email")
+	List<Cliente> findClientesByUserEmail(@Param("email") String email);
 	
 }

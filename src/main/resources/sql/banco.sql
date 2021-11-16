@@ -165,7 +165,7 @@ create sequence refresh_token_seq start 1 increment 1;
 
 create sequence user_device_seq start 1 increment 1;
 
-create sequence user_seq start 1 increment 50;
+create sequence user_seq start 1 increment 1;
 
 alter table cliente add constraint FKs3ilie2cb4jwyaohl61ida3q9 foreign key (id_user) references users;
 

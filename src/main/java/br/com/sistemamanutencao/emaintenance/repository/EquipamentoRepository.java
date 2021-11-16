@@ -13,5 +13,5 @@ import br.com.sistemamanutencao.emaintenance.model.entity.Equipamento;
 public interface EquipamentoRepository extends JpaRepository<Equipamento, Integer> {
 
 	@Query(value = "select e from Equipamento e, User u where u.id =:userId")
-	public List<Equipamento> findEquipamentoByUser(@Param("userId") long userId);
+	public List<Equipamento> findEquipamentoByUser(@Param("userId") Integer userId);
 }

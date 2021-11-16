@@ -71,6 +71,12 @@ public class Equipamento implements Serializable{
     @NotNull(message = "{campo.localizacao.obrigatorio}")
 	@Column
 	private String localizacao;
+    
+    //Avaliação das condições gerais do equipamento
+    private String avaliacaoIntegridade;
+
+    //Quanto o equipamento pode operar em porcentagem, ex: 10%, 50%, 100%
+    private String porcentagemOperacional;
 
     @ManyToOne
     @JoinColumn(name = "id_user")

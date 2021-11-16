@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.sistemamanutencao.emaintenance.model.RefreshToken;
 
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Integer> {
 
     @Override
-    Optional<RefreshToken> findById(Long id);
+    Optional<RefreshToken> findById(Integer id);
 
     Optional<RefreshToken> findByToken(String token);
 
