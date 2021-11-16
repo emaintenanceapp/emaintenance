@@ -91,7 +91,7 @@ public class AuthService {
 		mailService.sendMail(new NotificationEmail("Please Activate your Account", user.getEmail(),
 				"Obrigado por se cadastrar , "
 						+ "por favor clique no url abaixo para ativar sua conta: "
-						+ "http://localhost:8080/api/auth/confirm-account/" + token));
+						+ "https://emaintenanceapplication.herokuapp.com/api/auth/confirm-account/" + token));
 	}
     
     
