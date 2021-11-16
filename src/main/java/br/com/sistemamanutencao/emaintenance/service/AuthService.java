@@ -103,7 +103,7 @@ public class AuthService {
 	private void fetchUserAndEnable(ConfirmationToken confirmationToken) {
 		String email = confirmationToken.getUser().getEmail();
 		boolean exists = userRepository.existsByEmail(email);
-		if(exists){
+		if(!exists){
 			log.info("Usuário não existe!");
             throw new UserCadastradoException(email, HttpStatus.CONFLICT);
 		}
