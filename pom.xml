@@ -14,10 +14,11 @@
 		<version>2.5.1</version>
 	</parent>
 
-	<properties>
-		<java.version>11</java.version>
+    <properties>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
 		<guava.version>26.0-jre</guava.version>
-	</properties>
+    </properties>
 
 	<dependencies>
 		<dependency>
