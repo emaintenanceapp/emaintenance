@@ -15,6 +15,7 @@ import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
 import br.com.sistemamanutencao.emaintenance.model.entity.vo.ClienteVO;
 import br.com.sistemamanutencao.emaintenance.repository.ClienteRepository;
+import lombok.var;
 
 @Service
 public class ClienteService {
