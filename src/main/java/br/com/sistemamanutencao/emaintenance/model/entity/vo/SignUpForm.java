@@ -1,4 +1,4 @@
-package br.com.sistemamanutencao.emaintenance.dto;
+package br.com.sistemamanutencao.emaintenance.model.entity.vo;
 
 import java.util.Set;
 

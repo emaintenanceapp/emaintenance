@@ -41,7 +41,7 @@ public class EquipamentoController {
 	@PostMapping(value = "/{usuarioLogado}")
 	public Equipamento salvar(@RequestBody @Valid Equipamento equipamento, @PathVariable(value = "usuarioLogado") final String usuarioLogado) {
 		User user = userRepository.findByEmail(usuarioLogado);
-		equipamento.setUser(user);
+		equipamento.setId(user.getId());
 		log.info("Equipamento salvo com sucesso! " + equipamento.getId());
 		return equipamentoRepository.save(equipamento);
 	}
@@ -79,7 +79,7 @@ public class EquipamentoController {
     		.map( equipamento -> {
     			equipamento.setId(equipamentoAtualizado.getId());
     			equipamento.setDataAtualizacao(LocalDate.now());
-    			equipamento.setUser(user);
+    			equipamento.setId(user.getId());
 				log.info("Equipamento atualizado com sucesso! " + equipamento.getId());
     			return equipamentoRepository.save(equipamento);
     		})

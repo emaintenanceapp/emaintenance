@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.sistemamanutencao.emaintenance.dto.LogOutRequest;
-import br.com.sistemamanutencao.emaintenance.dto.UserDTO;
 import br.com.sistemamanutencao.emaintenance.event.OnUserLogoutSuccessEvent;
 import br.com.sistemamanutencao.emaintenance.exception.ResourceNotFoundException;
 import br.com.sistemamanutencao.emaintenance.exception.UserLogoutException;
 import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.UserDevice;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.LogOutRequest;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.UserVO;
 import br.com.sistemamanutencao.emaintenance.repository.UserRepository;
 import br.com.sistemamanutencao.emaintenance.response.ApiResponse;
 import br.com.sistemamanutencao.emaintenance.response.UserProfile;
@@ -82,8 +82,8 @@ public class UserController {
     // Consulta traz apenas os cadatrados pelo usuário corrente
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
     @GetMapping(value = "/me/{usuarioLogado}", produces="application/json")
-    public UserDTO getCurrentUserDTO(@PathVariable String usuarioLogado) {		
-    	UserDTO user = userService.findByEmailDTO(usuarioLogado);		
+    public UserVO getCurrentUserDTO(@PathVariable String usuarioLogado) {		
+    	UserVO user = userService.findByEmailDTO(usuarioLogado);		
     	return user;
     }
 

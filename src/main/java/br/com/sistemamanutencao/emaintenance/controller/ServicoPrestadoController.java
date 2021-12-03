@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,10 +23,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import br.com.sistemamanutencao.emaintenance.dto.ServicoPrestadoDTO;
+import br.com.sistemamanutencao.emaintenance.exception.ClienteCadastradoException;
 import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
 import br.com.sistemamanutencao.emaintenance.model.entity.ServicoPrestado;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.ServicoPrestadoVO;
 import br.com.sistemamanutencao.emaintenance.repository.ClienteRepository;
 import br.com.sistemamanutencao.emaintenance.repository.ServicoPrestadoRepository;
 import br.com.sistemamanutencao.emaintenance.repository.UserRepository;
@@ -42,69 +44,68 @@ public class ServicoPrestadoController {
     private final ClienteRepository clienteRepository;
     private final UserRepository userRepository;
 	private final ServicoPrestadoRepository servicoPrestadoRepository;
+	
+	private ServicoPrestadoVO servicoPrestadoDTO = new ServicoPrestadoVO();
+	
+	private List<ServicoPrestadoVO> listaServicosPrestadosDTO = new ArrayList<ServicoPrestadoVO>();
 
 	@ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
     @PostMapping(value = "/{usuarioLogado}")
-	public ServicoPrestado salvar(@RequestBody @Valid ServicoPrestadoDTO dto, @PathVariable(value = "usuarioLogado") final String usuarioLogado) {
-    	
+	public ServicoPrestado salvar(@RequestBody @Valid ServicoPrestadoVO dto, @PathVariable(value = "usuarioLogado") final String usuarioLogado) {
 		User user = userRepository.findByEmail(usuarioLogado);
-		LocalDate data = LocalDate.parse(dto.getData(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		Integer idCliente = dto.getIdCliente();
+    	
+    	if (user.getActive()) {
+    		LocalDate data = dto.getData();
+    		Integer idCliente = dto.getCliente().getId();
+    		Cliente cliente = clienteRepository.findById(idCliente)
+    				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente inexistente."));
 
-		Cliente cliente = clienteRepository.findById(idCliente)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente inexistente."));
-
-		ServicoPrestado servicoPrestado = new ServicoPrestado();
-		servicoPrestado.setDescricao(dto.getDescricao());
-		servicoPrestado.setData(data);
-		servicoPrestado.setCliente(cliente);
-		servicoPrestado.setPreco(dto.getPreco());
-		servicoPrestado.setUser(user);
-		log.info("Serviço Prestado salvo com sucesso! " + servicoPrestado.getId());
-		return servicoPrestadoRepository.save(servicoPrestado);
+    		ServicoPrestado servicoPrestado = new ServicoPrestado();
+    		servicoPrestado.setDescricao(dto.getDescricao());
+    		servicoPrestado.setData(data);
+    		servicoPrestado.setCliente(cliente);
+    		servicoPrestado.setPreco(dto.getPreco());
+    		servicoPrestado.setUser(user);
+    		log.info("Serviço Prestado salvo com sucesso! " + servicoPrestado.getId());
+    		return servicoPrestadoRepository.save(servicoPrestado);
+    	}
+    	return null;
 	}
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-	@GetMapping
-	public List<ServicoPrestado> pesquisar(
-			@RequestParam(value = "nome", required = false, defaultValue = "") String nome,
-			@RequestParam(value = "mes", required = false) Integer mes) {
-		return servicoPrestadoRepository.findByNomeClienteAndMes("%" + nome + "%", mes);
-	}
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
+//	@GetMapping
+//	public List<ServicoPrestado> pesquisar(
+//			@RequestParam(value = "nome", required = false, defaultValue = "") String nome,
+//			@RequestParam(value = "mes", required = false) Integer mes) {
+//		List<ServicoPrestado> listaServicosPrestados = servicoPrestadoRepository.findByNomeClienteAndMes("%" + nome + "%", mes);
+//    	extractedServicoPrestado(listaServicosPrestados, servicoPrestadoDTO, dto);
+//		return servicoPrestadoRepository.findByNomeClienteAndMes("%" + nome + "%", mes);
+//	}
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-	@GetMapping("/pesquisarDTO")
-	public List<ServicoPrestadoDTO> pesquisarDTO(
+	@GetMapping("/pesquisar")
+	public List<ServicoPrestadoVO> pesquisarDTO(
 			@RequestParam(value = "nome", required = false, defaultValue = "") String nome,
 			@RequestParam(value = "mes", required = false) Integer mes) {
 		List<ServicoPrestado> listaServicosPrestados = servicoPrestadoRepository.findByNomeClienteAndMes("%" + nome + "%", mes);
-		ServicoPrestadoDTO servicoPrestadoDTO = new ServicoPrestadoDTO();
-		List<ServicoPrestadoDTO> dto = new ArrayList<ServicoPrestadoDTO>();
-		for (ServicoPrestado sp : listaServicosPrestados) {
-			servicoPrestadoDTO.setNomeCliente(sp.getCliente().getNome());
-			servicoPrestadoDTO.setData(sp.getData().toString());
-			servicoPrestadoDTO.setIdCliente(sp.getCliente().getId());
-			servicoPrestadoDTO.setPreco(sp.getPreco());
-			servicoPrestadoDTO.setDescricao(sp.getDescricao());
-			dto.add(servicoPrestadoDTO);
-		}
-		return dto;
+		return listaServicosPrestadosDTO;
 	}
 	
     // Consulta traz apenas os cadatrados pelo usuário corrente
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@GetMapping("/{userId}")
-	public List<ServicoPrestado> findClientesByUser(@PathVariable Integer userId) {		
-		List<ServicoPrestado> servicoPrestados = servicoPrestadoRepository.findClientesByUserId(userId);		
-		return servicoPrestados;
+	public List<ServicoPrestadoVO> findClientesByUser(@PathVariable Integer userId) {		
+		List<ServicoPrestado> listaServicosPrestados = servicoPrestadoRepository.findClientesByUserId(userId);		
+		return listaServicosPrestadosDTO;
 	}
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@GetMapping("/servico-prestado/{id}")
-	public ServicoPrestado acharPorId(@PathVariable Integer id) {
-		return servicoPrestadoRepository.findById(id).orElseThrow(
+	public ServicoPrestadoVO acharPorId(@PathVariable Integer id) {
+    	ServicoPrestado servicoPrestado = servicoPrestadoRepository.findById(id).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico Prestado não encontrado"));
+		return servicoPrestadoDTO;
 	}
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -122,14 +123,18 @@ public class ServicoPrestadoController {
     @PutMapping(value = "/{usuarioLogado}/{id}")
 	public void atualizar(@PathVariable Integer id, @RequestBody @Valid ServicoPrestado servicoPrestadoAtualizado, @PathVariable(value = "usuarioLogado") final String usuarioLogado ) {
 		User user = userRepository.findByEmail(usuarioLogado);
-		servicoPrestadoRepository.findById(id).map(servicoPrestado -> {
-			servicoPrestado.setCliente(servicoPrestadoAtualizado.getCliente());
-			servicoPrestado.setDescricao(servicoPrestadoAtualizado.getDescricao());
-			servicoPrestado.setData(servicoPrestadoAtualizado.getData());
-			servicoPrestado.setPreco(servicoPrestadoAtualizado.getPreco());
-			servicoPrestado.setUser(user);
-			log.info("Serviço Prestado atualizado com sucesso! " + servicoPrestado.getId());
-			return servicoPrestadoRepository.save(servicoPrestado);
-		}).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico Prestado não encontrado"));
+		
+    	if (user.getActive()) {
+    		servicoPrestadoRepository.findById(id).map(servicoPrestado -> {
+//    			servicoPrestado.setCliente(servicoPrestadoAtualizado.getCliente());
+//    			servicoPrestado.setDescricao(servicoPrestadoAtualizado.getDescricao());
+//    			servicoPrestado.setData(servicoPrestadoAtualizado.getData());
+//    			servicoPrestado.setPreco(servicoPrestadoAtualizado.getPreco());
+//    			servicoPrestado.setUser(user);
+    			log.info("Serviço Prestado atualizado com sucesso! " + servicoPrestado.getId());
+    			return servicoPrestadoRepository.save(servicoPrestado);
+    		}).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico Prestado não encontrado"));
+    	}
 	}
+	
 }

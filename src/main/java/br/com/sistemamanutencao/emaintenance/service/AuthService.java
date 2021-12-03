@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.com.sistemamanutencao.emaintenance.dto.SignUpForm;
 import br.com.sistemamanutencao.emaintenance.exception.SpringEmaintenanceException;
 import br.com.sistemamanutencao.emaintenance.exception.UserCadastradoException;
 import br.com.sistemamanutencao.emaintenance.model.ConfirmationToken;
@@ -20,6 +19,7 @@ import br.com.sistemamanutencao.emaintenance.model.Role;
 import br.com.sistemamanutencao.emaintenance.model.RoleName;
 import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.entity.NotificationEmail;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.SignUpForm;
 import br.com.sistemamanutencao.emaintenance.repository.ConfirmationTokenRepository;
 import br.com.sistemamanutencao.emaintenance.repository.RoleRepository;
 import br.com.sistemamanutencao.emaintenance.repository.UserRepository;

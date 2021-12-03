@@ -5,11 +5,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.sistemamanutencao.emaintenance.dto.DeviceInfo;
 import br.com.sistemamanutencao.emaintenance.exception.TokenRefreshException;
-import br.com.sistemamanutencao.emaintenance.model.ConfirmationToken;
 import br.com.sistemamanutencao.emaintenance.model.RefreshToken;
 import br.com.sistemamanutencao.emaintenance.model.UserDevice;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.DeviceInfo;
 import br.com.sistemamanutencao.emaintenance.repository.UserDeviceRepository;
 
 @Service

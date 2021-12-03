@@ -14,9 +14,12 @@ import javax.persistence.PrePersist;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.modelmapper.ModelMapper;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import br.com.sistemamanutencao.emaintenance.model.User;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.EquipamentoVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -93,6 +96,10 @@ public class Equipamento implements Serializable{
     @NotNull(message = "{campo.status.obrigatorio}")
 	@Column
 	private boolean status;
+    
+	public static Equipamento create(EquipamentoVO equipamentoVO) {
+		return new ModelMapper().map(equipamentoVO, Equipamento.class);
+	}
 
 	@PrePersist
 	public void prepersist(){

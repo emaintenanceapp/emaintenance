@@ -7,8 +7,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import br.com.sistemamanutencao.emaintenance.cache.LoggedOutJwtTokenCache;
-import br.com.sistemamanutencao.emaintenance.dto.DeviceInfo;
 import br.com.sistemamanutencao.emaintenance.event.OnUserLogoutSuccessEvent;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.DeviceInfo;
 
 @Component
 public class OnUserLogoutSuccessEventListener implements ApplicationListener<OnUserLogoutSuccessEvent> {

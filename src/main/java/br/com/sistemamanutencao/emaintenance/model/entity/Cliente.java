@@ -1,15 +1,29 @@
 package br.com.sistemamanutencao.emaintenance.model.entity;
 
+import java.time.LocalDate;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.br.CPF;
+import org.modelmapper.ModelMapper;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import br.com.sistemamanutencao.emaintenance.model.User;
-import lombok.*;
-import org.hibernate.validator.constraints.br.CPF;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.ClienteVO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -36,15 +50,19 @@ public class Cliente {
     private User user;
     
     @Column(name = "data_cadastro", updatable = false)
-	@JsonFormat(pattern = "dd/MM/yyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
 	private LocalDate dataCadastro;
 	
 	@Column(name = "data_atualizacao", updatable = true)
-	@JsonFormat(pattern = "dd/MM/yyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
 	private LocalDate dataAtualizacao;
 		
 	@Column
 	private boolean status;
+	
+	public static Cliente create(ClienteVO clienteVO) {
+		return new ModelMapper().map(clienteVO, Cliente.class);
+	}
 
 	@PrePersist
 	public void prepersist() {
