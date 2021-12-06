@@ -1,5 +1,5 @@
 package br.com.sistemamanutencao.emaintenance.model.entity;
 
-public class Aquisição {
+public class Aquisicao {
 //Colocar em um planejamento futuro ou urgente, a aquisição de um novo equipamento
 }

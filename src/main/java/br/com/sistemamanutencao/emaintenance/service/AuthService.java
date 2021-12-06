@@ -89,9 +89,10 @@ public class AuthService {
 		String token = generateVerificationToken(user);
 		
 		mailService.sendMail(new NotificationEmail("Please Activate your Account", user.getEmail(),
-				"Obrigado por se cadastrar , "
-						+ "por favor clique no url abaixo para ativar sua conta: "
-						+ "https://emaintenanceapplication.herokuapp.com/api/auth/confirm-account/" + token));
+				"Obrigado por se cadastrar, "
+						+ "por favor clique no botão abaixo para ativar sua conta:<br/><br/><br/><br/> "
+						+ "<a href=\"https://emaintenanceapplication.herokuapp.com/api/auth/confirm-account/\">Ativar Conta</a>" 
+						+ " " + token));
 	}
     
     

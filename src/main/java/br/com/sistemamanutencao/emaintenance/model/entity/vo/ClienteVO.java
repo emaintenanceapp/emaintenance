@@ -41,7 +41,7 @@ public class ClienteVO extends RepresentationModel<ClienteVO> implements Seriali
 	private String cpf;
 
 	@JsonProperty("idUsuario")
-	private UserVO user;
+	private Integer idUsuario;
 
 	@JsonProperty("dataCadastro")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -55,7 +55,8 @@ public class ClienteVO extends RepresentationModel<ClienteVO> implements Seriali
 	private boolean status;
 
 	public static ClienteVO create(Cliente cliente) {
-		return new ModelMapper().map(cliente, ClienteVO.class);
+		ClienteVO clienteVO = new ModelMapper().map(cliente, ClienteVO.class);
+		return clienteVO;
 	}
 	
 	@PrePersist
@@ -71,4 +72,5 @@ public class ClienteVO extends RepresentationModel<ClienteVO> implements Seriali
 	public void deactivate() {
 		this.status = false;
 	}
+	
 }

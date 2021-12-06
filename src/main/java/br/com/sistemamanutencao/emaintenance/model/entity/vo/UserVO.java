@@ -2,11 +2,13 @@ package br.com.sistemamanutencao.emaintenance.model.entity.vo;
 
 import java.io.Serializable;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import br.com.sistemamanutencao.emaintenance.model.User;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -34,4 +36,8 @@ public class UserVO extends RepresentationModel<UserVO> implements Serializable 
 
 	@JsonProperty("nomeUser")
 	private String nomeUser;
+	
+	public static UserVO create(User cliente) {
+		return new ModelMapper().map(cliente, UserVO.class);
+	}
 }

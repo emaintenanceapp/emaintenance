@@ -94,33 +94,38 @@ public class AuthController {
 //    	
 		String email  = loginRequest.getEmail();
 		
-		User user = userRepository.findByEmail(email);
-
-		if (user.getActive()) {
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-			String jwtToken = jwtProvider.generateJwtToken(authentication);
-			userDeviceService.findByUserId(user.getId()).map(UserDevice::getRefreshToken).map(RefreshToken::getId)
-					.ifPresent(refreshTokenService::deleteById);
-			String clienteOS = getClientOS(request);
-			String deviceType = getClientBrowser(request);
-			DeviceInfo deviceInfo = new DeviceInfo();
-			deviceInfo.setDeviceId(clienteOS);
-			deviceInfo.setDeviceType(deviceType);
-			printClientInfo(request);
-			UserDevice userDevice = userDeviceService.createUserDevice(deviceInfo);
-			RefreshToken refreshToken = refreshTokenService.createRefreshToken();
-			userDevice.setUser(user);
-			userDevice.setRefreshToken(refreshToken);
-			refreshToken.setUserDevice(userDevice);
-			refreshToken = refreshTokenService.save(refreshToken);
-			log.info("Usuário logado com sucesso!");
-			return ResponseEntity
-					.ok(new JwtResponse(jwtToken, refreshToken.getToken(), jwtProvider.getExpiryDuration()));
+		if (!userRepository.existsByEmail(email)) {
+			log.info("Usuário não encontrado!");
+			return new ResponseEntity<>("Usuário não encontrado!", HttpStatus.CONFLICT);
+		}else {
+			User user = userRepository.findByEmail(email);
+			if (user.getActive()) {
+				Authentication authentication = authenticationManager.authenticate(
+						new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+				
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+				String jwtToken = jwtProvider.generateJwtToken(authentication);
+				userDeviceService.findByUserId(user.getId()).map(UserDevice::getRefreshToken).map(RefreshToken::getId)
+				.ifPresent(refreshTokenService::deleteById);
+				String clienteOS = getClientOS(request);
+				String deviceType = getClientBrowser(request);
+				DeviceInfo deviceInfo = new DeviceInfo();
+				deviceInfo.setDeviceId(clienteOS);
+				deviceInfo.setDeviceType(deviceType);
+				printClientInfo(request);
+				UserDevice userDevice = userDeviceService.createUserDevice(deviceInfo);
+				RefreshToken refreshToken = refreshTokenService.createRefreshToken();
+				userDevice.setUser(user);
+				userDevice.setRefreshToken(refreshToken);
+				refreshToken.setUserDevice(userDevice);
+				refreshToken = refreshTokenService.save(refreshToken);
+				log.info("Usuário logado com sucesso!");
+				return ResponseEntity
+						.ok(new JwtResponse(jwtToken, refreshToken.getToken(), jwtProvider.getExpiryDuration()));
+			}
 		}
-		return ResponseEntity.badRequest().body(new ApiResponse(false, "User has been deactivated/locked !!"));
+		log.info("User has been deactivated/locked !!!");
+        return new ResponseEntity<>("Usuário nao encontrado com sucesso!", OK);
 	}
 
 //	@PostMapping("/register")
@@ -188,7 +193,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> signup(@Valid @RequestBody SignUpForm signUpRequest) {
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-			log.info("Usuário não encontrado!");
+			log.info("Usuário já cadastrado com esse email!");
 			return new ResponseEntity<String>("Usuário já cadastrado com esse email!", HttpStatus.CONFLICT);
 		}
 		log.info("Usuário cadastrado com sucesso!");

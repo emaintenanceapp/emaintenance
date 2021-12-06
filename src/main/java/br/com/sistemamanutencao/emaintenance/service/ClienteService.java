@@ -15,6 +15,7 @@ import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
 import br.com.sistemamanutencao.emaintenance.model.entity.vo.ClienteVO;
 import br.com.sistemamanutencao.emaintenance.repository.ClienteRepository;
+import br.com.sistemamanutencao.emaintenance.repository.UserRepository;
 import lombok.var;
 
 @Service
@@ -22,14 +23,20 @@ public class ClienteService {
 
 	@Autowired
 	private ClienteRepository clienteRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	public boolean existsByCpf(String cpf) {
 		return clienteRepository.existsByCpf(cpf);
 	}
 
 	public ClienteVO create(ClienteVO clienteVO) {
-		ClienteVO clienteVORetorno = ClienteVO.create(clienteRepository.save(Cliente.create(clienteVO)));
-		return clienteVORetorno;
+		Optional<User> user = userRepository.findById(clienteVO.getIdUsuario());
+		Cliente cliente = Cliente.create(clienteVO);
+		cliente.setUser(user.get());
+		Cliente clienteRetorno = clienteRepository.save(cliente);
+		return ClienteVO.create(clienteRetorno);
 	}
 
 	public Page<ClienteVO> findAll(Pageable pageable) {
@@ -46,8 +53,8 @@ public class ClienteService {
 		return page.map(this::convertToClienteVO);
 	}
 	
-	public Page<ClienteVO> findByNomeContaining(String nome, User user, Pageable pageable) {
-		var page = clienteRepository.findByNomeContaining(nome, user.getId(), pageable);
+	public Page<ClienteVO> findByNomeLike(String nome, User user, Pageable pageable) {
+		Page<Cliente> page = clienteRepository.findByNomeLike(nome, user.getId(), pageable);
 		return page.map(this::convertToClienteVO);
 	}
 

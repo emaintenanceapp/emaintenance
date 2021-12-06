@@ -23,13 +23,19 @@ import br.com.sistemamanutencao.emaintenance.model.entity.vo.ClienteVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
 @Data
-@NoArgsConstructor
+@Entity
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode(callSuper = false)
 public class Cliente {
 
     @Id
@@ -61,7 +67,8 @@ public class Cliente {
 	private boolean status;
 	
 	public static Cliente create(ClienteVO clienteVO) {
-		return new ModelMapper().map(clienteVO, Cliente.class);
+		Cliente cliente = new ModelMapper().map(clienteVO, Cliente.class);
+		return cliente;
 	}
 
 	@PrePersist

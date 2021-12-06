@@ -20,9 +20,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.br.CPF;
+import org.modelmapper.ModelMapper;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.UserVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -78,6 +80,10 @@ public class User {
 	@Column(name = "data_atualizacao", updatable = true)
 	@JsonFormat(pattern = "dd/MM/yyy")
 	private LocalDate dataAtualizacao;
+	
+	public static User create(UserVO userVO) {
+		return new ModelMapper().map(userVO, User.class);
+	}
 	
 	@PrePersist
 	public void prepersist() {

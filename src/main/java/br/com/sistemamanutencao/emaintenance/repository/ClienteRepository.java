@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import br.com.sistemamanutencao.emaintenance.model.User;
 import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
-import br.com.sistemamanutencao.emaintenance.model.entity.vo.ClienteVO;
 
 @Repository
 public interface ClienteRepository
@@ -53,11 +52,11 @@ public interface ClienteRepository
 	}
 	
 	// Consulta traz apenas os cadatrados pelo usuário corrente pelo email
-	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId and c.nome =:nome")
-	public Page<Cliente> findByNomeContaining(@Param("nome") String nome, @Param("userId") Integer userId, Pageable pageReq);
+	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId and c.nome like %:nome%")
+	public Page<Cliente> findByNomeLike(@Param("nome") String nome, @Param("userId") Integer userId, Pageable pageReq);
 	
-	default Page<Cliente> findByNomeContaining(Cliente cliente, User user, Pageable pageReq) {
-		return findByNomeContaining(cliente.getNome(), user.getId(), pageReq);
+	default Page<Cliente> findByNomeLike(Cliente cliente, User user, Pageable pageReq) {
+		return findByNomeLike(cliente.getNome(), user.getId(), pageReq);
 	}
 	
 //	Page<Cliente> findAll(User user, Pageable pageable);

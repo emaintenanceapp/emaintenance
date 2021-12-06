@@ -26,6 +26,7 @@ public class EmailSenderService {
     void sendMail(NotificationEmail notificationEmail) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            mimeMessage.setContent(notificationEmail.getSubject(), "text/html");
             messageHelper.setFrom("emaintenanceapplication@gmail.com");
             messageHelper.setTo(notificationEmail.getRecipient());
             messageHelper.setText(notificationEmail.getBody());
@@ -33,7 +34,7 @@ public class EmailSenderService {
         };
         try {
         	javaMailSender.send(messagePreparator);
-            log.info("Activation email sent!!");
+            log.info("Email de ativação enviado!!");
         } catch (MailException e) {
             log.error("Exception occurred when sending mail", e);
             throw new SpringEmaintenanceException("Exception occurred when sending mail to " + notificationEmail.getRecipient(), e);

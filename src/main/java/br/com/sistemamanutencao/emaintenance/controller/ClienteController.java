@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.HttpStatus;
@@ -63,7 +62,7 @@ public class ClienteController {
 	}
 
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-	@GetMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+	@GetMapping(value = "/cliente/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
 	public ClienteVO findById(@PathVariable("id") Integer id) {
 		ClienteVO clienteVO = clienteService.findById(id);
 		clienteVO.add(linkTo(methodOn(ClienteController.class).findById(id)).withSelfRel());
@@ -118,37 +117,6 @@ public class ClienteController {
 		return clienteVO;
 	}
 
-//	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-//	@GetMapping(value = "/lista-cliente/{usuarioLogado}", produces = { "application/hal+json", "application/xml",
-//			"application/x-yaml" })
-//	public ResponseEntity<?> findAll(@RequestParam(value = "page", defaultValue = "0") int page,
-//			@RequestParam(value = "size", defaultValue = "3") int size,
-//			@RequestParam(value = "direction", defaultValue = "asc") String direction,
-//			@PathVariable(value = "usuarioLogado") final String usuarioLogado) {
-//		List<ClienteVO> clientes = new ArrayList<ClienteVO>();
-//		User user = userService.findByEmail(usuarioLogado);
-//		var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
-//
-//		Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
-//
-//		Page<ClienteVO> pageTuts = clienteService.findAll(pageable);
-//		clientes = pageTuts.getContent();
-//
-//		clientes.stream().forEach(c -> c.add(linkTo(
-//				methodOn(ClienteController.class).findClientesByUserId(page, size, direction, direction, user.getId()))
-//						.withSelfRel()));
-//
-//		Map<String, Object> response = new HashMap<>();
-//		response.put("clientes", clientes);
-//		response.put("currentPage", pageTuts.getNumber());
-//		response.put("totalItems", pageTuts.getTotalElements());
-//		response.put("totalPages", pageTuts.getTotalPages());
-//
-////		PagedModel<EntityModel<ClienteVO>> pagedModel = assembler.toModel(clientes);
-//
-//		return new ResponseEntity<>(response, HttpStatus.OK);
-//	}
-
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@GetMapping(value = "/lista-cliente/{usuarioLogado}", produces = { "application/hal+json", "application/xml",
 			"application/x-yaml" })
@@ -182,7 +150,7 @@ public class ClienteController {
 				pageTuts = clienteService.findAll(user, pagingSort);
 //				pageTuts = clienteService.findAll(pagingSort);
 			else
-				pageTuts = clienteService.findByNomeContaining(nome, user, pagingSort);
+				pageTuts = clienteService.findByNomeLike(nome, user, pagingSort);
 //			pageTuts = clienteService.findByNomeContaining(nome, pagingSort);
 
 			
@@ -241,8 +209,9 @@ public class ClienteController {
 			throw new ClienteCadastradoException(user.getCpf());
 		}
 		clienteVO.activate();
-		clienteVO.setId(user.getId());
+		clienteVO.setIdUsuario(user.getId());
 		ClienteVO cliVO = clienteService.create(clienteVO);
+		cliVO.setIdUsuario(user.getId());
 		cliVO.add(linkTo(methodOn(ClienteController.class).findById(cliVO.getId())).withSelfRel());
 		return cliVO;
 	}
@@ -298,17 +267,19 @@ public class ClienteController {
 //    }
 
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-	@PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" }, consumes = {
+	@PutMapping(value = "/cliente/{usuarioLogado}", produces = { "application/json", "application/xml", "application/x-yaml" }, consumes = {
 			"application/json", "application/xml", "application/x-yaml" })
-	public ClienteVO update(@RequestBody ClienteVO produtoVO) {
+	public ClienteVO update(@RequestBody ClienteVO produtoVO,
+			@PathVariable(value = "usuarioLogado") final String usuarioLogado) {
 		ClienteVO proVO = clienteService.update(produtoVO);
 		proVO.add(linkTo(methodOn(ClienteController.class).findById(proVO.getId())).withSelfRel());
 		return proVO;
 	}
 
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable("id") Integer id) {
+	@DeleteMapping("/cliente/{usuarioLogado}/{id}")
+	public ResponseEntity<?> delete(
+			@PathVariable(value = "usuarioLogado") final String usuarioLogado, @PathVariable("id") Integer id) {
 		clienteService.delete(id);
 		return ResponseEntity.ok().build();
 	}
