@@ -118,22 +118,31 @@ public class ClienteService {
 		return ClienteVO.create(entity);
 	}
 
-	public ClienteVO update(ClienteVO clienteVO) {
+	public ClienteVO update(User user, ClienteVO clienteVO) {
+		
 		final Optional<Cliente> optionalCliente = clienteRepository.findById(clienteVO.getId());
 
 		if (!optionalCliente.isPresent()) {
-			new ResourceNotFoundException("Não foram encontrados registros para esse ID", null, optionalCliente);
+			new ResourceNotFoundException("Cliente não existe na base de dados!", null, optionalCliente);
 		}
-		return ClienteVO.create(clienteRepository.save(Cliente.create(clienteVO)));
+		Cliente cliente = Cliente.create(clienteVO);
+		cliente.setUser(user);
+		Cliente clienteRetorno = clienteRepository.save(cliente);
+		return ClienteVO.create(clienteRetorno);
 	}
 
-	public void delete(Integer id) {
-		var entity = clienteRepository.findById(id).orElseThrow(
+	public void delete(User user,Integer id) {
+		Cliente cliente = clienteRepository.findById(id).orElseThrow(
 				() -> new ResourceNotFoundException("Não foram encontrados registros para esse ID", "id", id));
-		clienteRepository.delete(entity);
+		cliente.setUser(user);
+		clienteRepository.delete(cliente);
 	}
 
 	private ClienteVO convertToClienteVO(Cliente cliente) {
 		return ClienteVO.create(cliente);
+	}
+	
+	private Cliente convertToCliente(ClienteVO clienteVO) {
+		return Cliente.create(clienteVO);
 	}
 }
