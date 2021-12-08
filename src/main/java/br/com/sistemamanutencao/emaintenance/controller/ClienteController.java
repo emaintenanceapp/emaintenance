@@ -269,18 +269,20 @@ public class ClienteController {
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@PutMapping(value = "/cliente/{usuarioLogado}", produces = { "application/json", "application/xml", "application/x-yaml" }, consumes = {
 			"application/json", "application/xml", "application/x-yaml" })
-	public ClienteVO update(@RequestBody ClienteVO produtoVO,
+	public ClienteVO update(@RequestBody ClienteVO clienteVO,
 			@PathVariable(value = "usuarioLogado") final String usuarioLogado) {
-		ClienteVO proVO = clienteService.update(produtoVO);
-		proVO.add(linkTo(methodOn(ClienteController.class).findById(proVO.getId())).withSelfRel());
-		return proVO;
+		User user = userService.findByEmail(usuarioLogado);
+		ClienteVO cliVO = clienteService.update(user, clienteVO);
+		cliVO.add(linkTo(methodOn(ClienteController.class).findById(cliVO.getId())).withSelfRel());
+		return cliVO;
 	}
 
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@DeleteMapping("/cliente/{usuarioLogado}/{id}")
 	public ResponseEntity<?> delete(
 			@PathVariable(value = "usuarioLogado") final String usuarioLogado, @PathVariable("id") Integer id) {
-		clienteService.delete(id);
+		User user = userService.findByEmail(usuarioLogado);
+		clienteService.delete(user, id);
 		return ResponseEntity.ok().build();
 	}
 }
