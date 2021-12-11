@@ -44,11 +44,19 @@ public interface ClienteRepository
 //	Page<Cliente> findByNomeContaining(String nome, Pageable pageable);
 	
 	// Consulta traz apenas os cadatrados pelo usuário corrente pelo email
-	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId and c.nome =:nome")
-	public Page<Cliente> findByNomeContaining(@Param("nome") String nome, Pageable pageReq);
-
-	default Page<Cliente> findByNomeContaining(Cliente cliente, Pageable pageReq) {
-		return findByNomeContaining(cliente.getNome(), pageReq);
+//	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId and c.nome =:nome")
+//	public Page<Cliente> findByNomeContaining(@Param("nome") String nome, Pageable pageReq);
+//
+//	default Page<Cliente> findByNomeContaining(Cliente cliente, Pageable pageReq) {
+//		return findByNomeContaining(cliente.getNome(), pageReq);
+//	}
+	
+	// Consulta traz apenas os cadatrados pelo usuário corrente pelo email
+	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId")
+	public Page<Cliente> findAll(@Param("userId") Integer userId, Pageable pageReq);
+	
+	default Page<Cliente> findAll(User user, Pageable pageReq) {
+		return findAll(user.getId(), pageReq);
 	}
 	
 	// Consulta traz apenas os cadatrados pelo usuário corrente pelo email
@@ -59,15 +67,4 @@ public interface ClienteRepository
 		return findByNomeLike(cliente.getNome(), user.getId(), pageReq);
 	}
 	
-//	Page<Cliente> findAll(User user, Pageable pageable);
-	
-	
-	// Consulta traz apenas os cadatrados pelo usuário corrente pelo email
-	@Query(value = "SELECT c FROM Cliente c JOIN c.user u WHERE u.id =:userId")
-	public Page<Cliente> findAll(@Param("userId") Integer userId, Pageable pageReq);
-
-	default Page<Cliente> findAll(User user, Pageable pageReq) {
-		return findAll(user.getId(), pageReq);
-	}
-
 }

@@ -16,7 +16,6 @@ import br.com.sistemamanutencao.emaintenance.model.entity.Cliente;
 import br.com.sistemamanutencao.emaintenance.model.entity.vo.ClienteVO;
 import br.com.sistemamanutencao.emaintenance.repository.ClienteRepository;
 import br.com.sistemamanutencao.emaintenance.repository.UserRepository;
-import lombok.var;
 
 @Service
 public class ClienteService {
@@ -40,52 +39,19 @@ public class ClienteService {
 	}
 
 	public Page<ClienteVO> findAll(Pageable pageable) {
-		var page = clienteRepository.findAll(pageable);
-		return page.map(this::convertToClienteVO);
-	}
-	public Page<ClienteVO> findAll(User user, Pageable pageable) {
-		var page = clienteRepository.findAll(user, pageable);
-		return page.map(this::convertToClienteVO);
-	}
-
-	public Page<ClienteVO> findByNomeContaining(String nome, Pageable pageable) {
-		var page = clienteRepository.findByNomeContaining(nome, pageable);
+		Page<Cliente> page = clienteRepository.findAll(pageable);
 		return page.map(this::convertToClienteVO);
 	}
 	
+	public Page<ClienteVO> findAll(User user, Pageable pageable) {
+		Page<Cliente> page = clienteRepository.findAll(user, pageable);
+		return page.map(this::convertToClienteVO);
+	}
+
 	public Page<ClienteVO> findByNomeLike(String nome, User user, Pageable pageable) {
 		Page<Cliente> page = clienteRepository.findByNomeLike(nome, user.getId(), pageable);
 		return page.map(this::convertToClienteVO);
 	}
-
-//	public Optional<List<Cliente>> findClientesByUserId(Integer userId) {
-//		var clientes = clienteRepository.findClientesByUserId(userId);
-//		if (clientes != null) {
-//			return clientes; 
-//		}else {
-//			throw new ClienteUserException(userId);
-//		}
-//	}
-
-//	public Optional<List<ClienteVO>> findClientesByUserId(int page, int size, String sortDir, String sort, Integer userId) {
-//	 
-//	    PageRequest pageReq
-//	     = PageRequest.of(page, size, Sort.Direction.fromString(sortDir), sort);
-//	 
-//	    Optional<List<Cliente>> clientes = clienteRepository
-//	      .findClientesByUserId(userId, pageReq);
-//	    return posts.getContent();
-//	}
-//	
-//	public List<ClienteVO> findClientesByUserEmail(int page, int size, String sortDir, String sort, String userEmail) {
-//		
-//		PageRequest pageReq
-//		= PageRequest.of(page, size, Sort.Direction.fromString(sortDir), sort);
-//		
-//		Optional<List<Cliente>> clientes = clienteRepository
-//				.findClientesByUserEmail(userEmail, pageReq);
-//		return clientes.getContent();
-//	}
 
 	public List<Cliente> findClientesByUserEmail(int page, int size, String sortDir, String sort, String email) {
 
@@ -103,17 +69,8 @@ public class ClienteService {
 		return posts.getContent();
 	}
 
-//	public Optional<List<Cliente>> findClientesByUserEmail(String userEmail) {
-//		var clientes = clienteRepository.findClientesByUserEmail(userEmail);
-//		if (clientes != null) {
-//			return clientes; 
-//		}else {
-//			throw new ClienteUserException("Username " + userEmail + " not found!");
-//		}
-//	}
-
 	public ClienteVO findById(Integer id) {
-		var entity = clienteRepository.findById(id).orElseThrow(
+		Cliente entity = clienteRepository.findById(id).orElseThrow(
 				() -> new ResourceNotFoundException("Não foram encontrados registros para esse ID", "id", id));
 		return ClienteVO.create(entity);
 	}

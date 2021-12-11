@@ -12,9 +12,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.validation.constraints.NotNull;
 
+import org.modelmapper.ModelMapper;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import br.com.sistemamanutencao.emaintenance.model.User;
+import br.com.sistemamanutencao.emaintenance.model.entity.vo.ServicoPrestadoVO;
 import lombok.Data;
 
 @Entity
@@ -54,17 +57,22 @@ public class ServicoPrestado {
 	@NotNull(message = "{campo.status.obrigatorio}")
 	@Column
 	private boolean status;
-
+	
+	public static ServicoPrestado create(ServicoPrestadoVO servicoPrestadoVO) {
+		ServicoPrestado servicoPrestado = new ModelMapper().map(servicoPrestadoVO, ServicoPrestado.class);
+		return servicoPrestado;
+	}
+	
 	@PrePersist
 	public void prepersist() {
 		setDataCadastro(LocalDate.now());
 		setDataAtualizacao(LocalDate.now());
 	}
-
+	
 	public void activate() {
 		this.status = true;
 	}
-
+	
 	public void deactivate() {
 		this.status = false;
 	}

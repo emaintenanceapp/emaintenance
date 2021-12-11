@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,14 +49,11 @@ public class ClienteController {
 	private final ClienteService clienteService;
 	private final UserService userService;
 	private final ModelMapper modelMapper;
-	private final PagedResourcesAssembler<ClienteVO> assembler;
 
 	@Autowired
-	public ClienteController(ClienteService clienteService, UserService userService,
-			PagedResourcesAssembler<ClienteVO> assembler, ModelMapper modelMapper) {
+	public ClienteController(ClienteService clienteService, UserService userService, ModelMapper modelMapper) {
 		this.clienteService = clienteService;
 		this.userService = userService;
-		this.assembler = assembler;
 		this.modelMapper = modelMapper;
 	}
 
@@ -69,37 +65,6 @@ public class ClienteController {
 		log.info("Find by id");
 		return clienteVO;
 	}
-
-//    @GetMapping
-//    @ResponseBody
-//    public List<ClienteVO> getPosts(@RequestParam(value = "page", defaultValue = "0") int page,
-//			@RequestParam(value = "limit", defaultValue = "12") int limit,
-//			@RequestParam(value = "direction", defaultValue = "asc") {
-//        //...
-//        List<ClienteVO> posts = clienteService.getPostsList(page, size, sortDir, sort);
-//        return posts.stream()
-//          .map(this::convertToDto)
-//          .collect(Collectors.toList());
-//    }
-
-//    @GetMapping
-//    @ResponseBody
-//    public List<ClienteVO> findClientesByUserEmail(
-//            @PathVariable("page") int page,
-//            @PathVariable("size") int size, 
-//            @PathVariable("sortDir") String sortDir, 
-//            @PathVariable("sort") String sort,
-//            @PathVariable("usuarioLogado") final String usuarioLogado) {
-//		User user = userService.findByEmail(usuarioLogado);
-//		boolean exists = clienteService.existsByCpf(clienteVO.getCpf());
-//		if(exists){
-//			throw new ClienteCadastradoException(user.getCpf());
-//		}
-//        List<Cliente> posts = clienteService.findClientesByUserEmail(page, size, sortDir, sort);
-//        return posts.stream()
-//          .map(this::convertToDto)
-//          .collect(Collectors.toList());
-//    }
 
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@GetMapping("/{userId}")
@@ -148,10 +113,8 @@ public class ClienteController {
 			if (nome == null)
 				// Passar o usuario logado
 				pageTuts = clienteService.findAll(user, pagingSort);
-//				pageTuts = clienteService.findAll(pagingSort);
 			else
 				pageTuts = clienteService.findByNomeLike(nome, user, pagingSort);
-//			pageTuts = clienteService.findByNomeContaining(nome, pagingSort);
 
 			
 			clienteVOs = pageTuts.getContent();
@@ -178,29 +141,11 @@ public class ClienteController {
 		return Sort.Direction.ASC;
 	}
 
-//    @ResponseStatus(HttpStatus.CREATED)
-//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-//    @PostMapping(value = "/{usuarioLogado}")
-//    public ClienteVO salvar( @RequestBody @Valid Cliente cliente, @PathVariable(value = "usuarioLogado") final String usuarioLogado){
-//		User user = userService.findByEmail(usuarioLogado);
-//    	if (user.getActive()) {
-//    		cliente.setCpf(cliente.getCpf().replaceAll("\\D", StringUtils.EMPTY));
-//    		boolean exists = clienteService.existsByCpf(cliente.getCpf());
-//    		if(exists){
-//    			throw new ClienteCadastradoException(cliente.getCpf());
-//    		}
-//    		cliente.activate();
-//    		cliente.setIdUsuario(user.getId());
-//			log.info("Cliente salvo com sucesso! " + cliente.getId());
-//            return clienteService.save(clienteVO);
-//    	}
-//    	return null;
-//    }
-
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping(value = "/{usuarioLogado}", produces = { "application/json", "application/xml",
-			"application/x-yaml" }, consumes = { "application/json", "application/xml", "application/x-yaml" })
+	@PostMapping(value = "/{usuarioLogado}", 
+				 produces = { "application/json", "application/xml", "application/x-yaml" }, 
+				 consumes = { "application/json", "application/xml", "application/x-yaml" })
 	public ClienteVO create(@RequestBody ClienteVO clienteVO,
 			@PathVariable(value = "usuarioLogado") final String usuarioLogado) {
 		User user = userService.findByEmail(usuarioLogado);
@@ -215,56 +160,6 @@ public class ClienteController {
 		cliVO.add(linkTo(methodOn(ClienteController.class).findById(cliVO.getId())).withSelfRel());
 		return cliVO;
 	}
-
-//    // Consulta traz apenas os cadatrados pelo usuário corrente
-//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-//	@GetMapping("/{userId}")
-//	public List<ClienteVO> findClientesByUser(@PathVariable Integer userId) {
-//		Optional<List<ClienteVO>> clientes = clienteService.findClientesByUserId(userId);
-//		return clientes;
-//	}
-
-//    // Consulta traz apenas os cadatrados pelo usuário corrente
-//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-//    @GetMapping("/cliente/{clienteId}")
-//    public ClienteVO findClienteById(@PathVariable Integer clienteId) {	
-//    	cliente = clienteService.findClienteById(clienteId);		
-//    	return clienteVO;
-//    }
-
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-//    @DeleteMapping("{id}")
-//    public void deletar( @PathVariable Integer id ){
-//    	clienteService
-//            .findById(id)
-//            .map( cliente -> {
-//                clienteService.delete(clienteVO);
-//                return Void.TYPE;
-//            })
-//            .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
-//    }
-//
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
-//    @PutMapping(value = "/{usuarioLogado}/{id}")
-//    public void atualizar( @PathVariable Integer id, @RequestBody @Valid Cliente clienteAtualizado, @PathVariable(value = "usuarioLogado") final String usuarioLogado ) {
-//		User user = userRepository.findByEmail(usuarioLogado);
-//        boolean exists = clienteService.existsByCpf(clienteAtualizado.getCpf());
-//        if(exists){
-//            throw new ClienteCadastradoException(clienteAtualizado.getCpf());
-//        }
-//        clienteService
-//                .findById(id)
-//                .map( cliente -> {
-//                    cliente.setNome(clienteAtualizado.getNome());
-//                    cliente.setCpf(clienteAtualizado.getCpf());
-//            		cliente.setUser(user);
-//        			log.info("Cliente atualizado com sucesso! " + cliente.getId());
-//                    return clienteRepository.save(cliente);
-//                })
-//                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
-//    }
 
 	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_ASSISTANT_MANAGER', 'ROLE_STAFF_MEMBER', 'ROLE_USER','ROLE_ANONYMOUS', 'ROLE_ANON')")
 	@PutMapping(value = "/cliente/{usuarioLogado}", produces = { "application/json", "application/xml", "application/x-yaml" }, consumes = {
